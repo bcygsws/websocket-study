@@ -40,7 +40,7 @@ server.on('connection', function connection(ws, req) {
 	ws.on('message', function incoming(message) {
 		console.log('received: %s from %s', message, clientName);
 
-		// 广播消息给所有客户端页面--如果是两个页面上开始显示同样的内容了
+		// 广播消息给所有客户端页面--如果是两个及其以上的页面，所有页面都显示相同的内容
 		server.clients.forEach(function each(client) {
 			if (client.readyState === WebSocket.OPEN) {
 				client.send(clientName + " -> " + message);
