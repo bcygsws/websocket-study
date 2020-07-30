@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		<title>聊天室客户端页面</title>
+	</head>
+	<body>
+		<script type="text/javascript">
+			var socket; //在此处定义的目的，使其成为全局变量，下面自定义的send方法叶梦使用该变量
+			if (!window.WebSocket) {
+				window.WebSocket = window.MozWebSocket;
+			}
+			if (window.WebSocket) {
+				socket = new WebSocket("ws://localhost:8080/ws");
+				socket.onmessage = function(event) {
+					var ta = document.getElementById('responseText');
+					ta.value = ta.value + '\n' + event.data;
+				};
+				// 页面刷新时，会进行一次socket请求，服务端会返回数据，数据使用envent.data来接收，第19行
+				socket.onopen = function(event) {
+					var ta = document.getElementById('responseText');
+					ta.value = "连接开启!";
+				};
+				socket.onclose = function(event) {
+					var ta = document.getElementById('responseText');
+					ta.value = ta.value + "连接被关闭";
+				};
+			} else {
+				alert("你的浏览器不支持 WebSocket！");
+			}
+			// 向服务端发送输入的文本内容
+			function send(message) {
+				if (!window.WebSocket) {
+					return;
+				}
+				// readyState属性用来定义连接状态：
+				/* 
+				 有四个常量值：
+				 CONNECTING 正在建立连接，还没有完成
+				 OPEN  连接已经完成，可以正常通信
+				 CLOSING 正在进行关闭握手，还没有关闭
+				 CLOSED 连接已经关闭或者根本没有建立
+				 */
+				if (socket.readyState == WebSocket.OPEN) {
+					socket.send(message);
+				} else {
+					alert("连接没有开启.");
+				}
+			}
+		</script>
+		<!-- 1.定义了一个form表单。注意：为了防止一个表单控件发生自动提交，可以在form中的onsubmit事件中，书写return false 来阻止表单自动提交 -->
+		<!-- 2.js中的点击事件中可以直接书写js代码，相当于函数体内部的内容。例如：return false;  或者下面的javascript:document,getElementById('responseText').value='' -->
+		<form onsubmit="return false;">
+			<h3>WebSocket 聊天室：</h3>
+			<textarea id="responseText" style="width: 500px; height: 300px;"></textarea>
+			<br>
+			<input type="text" name="message" style="width: 300px" value="欢迎来到网页聊天室">
+			<!-- this指得是被点击元素的原生对象，messag e在form表单中，this.form.message.value,可以那大textarea中的值 -->
+			<input type="button" value="发送消息" onclick="send(this.form.message.value)">
+			<input type="button" onclick="javascript:document.getElementById('responseText').value=''" value="清空聊天记录">
+		</form>
+		<br>
+		<!-- <br> -->
+		<!-- 提示相关学习链接，可忽略 -->
+		<!-- <a href="https://waylau.com/">更多例子请访问 waylau.com</a> -->
+	</body>
+</html>
